@@ -162,6 +162,9 @@ class MultiHeadAttention(nn.Layer):
         keys, values = cat, cat
 
         print(queries.shape, keys.shape, values.shape, rel_pos.shape, rel_task.shape)
+        print(queries.shape, keys.shape, values.shape, rel_pos.shape, rel_task.shape)
+
+        print(len(queries.shape), len(keys.shape),len(values.shape),len(rel_pos.shape),len(rel_task.shape))
         if not (len(queries.shape) == len(keys.shape) == len(values.shape) \
                 == len(rel_pos.shape) == len(rel_task.shape) == 3):
             raise ValueError(
