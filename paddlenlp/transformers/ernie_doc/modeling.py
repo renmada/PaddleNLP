@@ -109,13 +109,13 @@ class MultiHeadAttention(nn.Layer):
         t = self.t_proj(rel_task)
         return q, k, v, r, t
 
-    def __split_heads(self, x, d_model, n_head):
+    def _split_heads(self, x, d_model, n_head):
         # x shape: [B, T, H]
         x = x.reshape(shape=[0, 0, n_head, d_model // n_head])
         # shape: [B, N, T, HH]
         return paddle.transpose(x=x, perm=[0, 2, 1, 3])
 
-    def __rel_shift(self, x, klen=-1):
+    def _rel_shift(self, x, klen=-1):
         """
         To perform relative attention, it should relatively shift the attention score matrix
         See more details on: https://github.com/kimiyoung/transformer-xl/issues/8#issuecomment-454458852        
@@ -128,11 +128,11 @@ class MultiHeadAttention(nn.Layer):
         # output shape: [B, N, T, T + M]
         return x[:, :, :, :klen]
 
-    def __scaled_dot_product_attention(self, q, k, v, r, t, attn_mask):
+    def _scaled_dot_product_attention(self, q, k, v, r, t, attn_mask):
         q_w, q_r, q_t = q
         score_w = paddle.matmul(q_w, k, transpose_y=True)
         score_r = paddle.matmul(q_r, r, transpose_y=True)
-        score_r = self.__rel_shift(score_r, k.shape[2])
+        score_r = self._rel_shift(score_r, k.shape[2])
         score_t = paddle.matmul(q_t, t, transpose_y=True)
         score = score_w + score_r + score_t
         score = score * (self.d_key ** -0.5)
@@ -144,7 +144,7 @@ class MultiHeadAttention(nn.Layer):
         out = paddle.matmul(weights, v)
         return out
 
-    def __combine_heads(self, x):
+    def _combine_heads(self, x):
         if len(x.shape) == 3: return x
         if len(x.shape) != 4:
             raise ValueError("Input(x) should be a 4-D Tensor.")
@@ -178,16 +178,16 @@ class MultiHeadAttention(nn.Layer):
             map(lambda x: q + x.unsqueeze([0, 1]),
                 [self.r_w_bias, self.r_r_bias, self.r_t_bias]))
         q_w, q_r, q_t = list(
-            map(lambda x: self.__split_heads(x, self.d_model, self.n_head),
+            map(lambda x: self._split_heads(x, self.d_model, self.n_head),
                 [q_w, q_r, q_t]))
         k, v, r, t = list(
-            map(lambda x: self.__split_heads(x, self.d_model, self.n_head),
+            map(lambda x: self._split_heads(x, self.d_model, self.n_head),
                 [k, v, r, t]))
 
-        ctx_multiheads = self.__scaled_dot_product_attention([q_w, q_r, q_t], \
+        ctx_multiheads = self._scaled_dot_product_attention([q_w, q_r, q_t], \
                                                              k, v, r, t, attn_mask)
 
-        out = self.__combine_heads(ctx_multiheads)
+        out = self._combine_heads(ctx_multiheads)
         out = self.out_proj(out)
         return out
 
