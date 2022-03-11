@@ -34,12 +34,6 @@ args = parser.parse_args()
 
 # yapf: enable
 
-def init_memory(batch_size, memory_length, d_model, n_layers):
-    return [
-        paddle.zeros(
-            [batch_size, memory_length, d_model], dtype="float32")
-        for _ in range(n_layers)
-    ]
 
 
 if __name__ == "__main__":
@@ -49,7 +43,7 @@ if __name__ == "__main__":
         "ernie-doc-base-zh", num_classes=119)
     model_config = model.ernie_doc.config
     memory_input_spec = [
-        paddle.static.InputSpec(shape=[None, args.memory_length, model_config['hidden_size']], dtype="float32")
+        paddle.static.InputSpec(shape=[None, -1, model_config['hidden_size']], dtype="float32")
         for _ in range(model_config['num_hidden_layers'])
     ]
 

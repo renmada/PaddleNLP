@@ -551,7 +551,7 @@ class ErnieDocModel(ErnieDocPretrainedModel):
         data_mask = paddle.concat(
             [
                 paddle.ones_like(
-                    memory_i,
+                    memory_i[:, :, :1],
                     dtype=attn_mask.dtype), attn_mask
             ],
             axis=1)
