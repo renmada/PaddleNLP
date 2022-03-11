@@ -101,7 +101,7 @@ class MultiHeadAttention(nn.Layer):
         self.dropout = nn.Dropout(
             dropout_rate, mode="upscale_in_train") if dropout_rate else None
 
-    def __compute_qkv(self, queries, keys, values, rel_pos, rel_task):
+    def compute_qkv(self, queries, keys, values, rel_pos, rel_task):
         q = self.q_proj(queries)
         k = self.k_proj(keys)
         v = self.v_proj(values)
@@ -172,7 +172,7 @@ class MultiHeadAttention(nn.Layer):
         #         "Inputs: quries, keys, values, rel_pos and rel_task should all be 3-D tensors."
         #     )
 
-        q, k, v, r, t = self.__compute_qkv(queries, keys, values, rel_pos,
+        q, k, v, r, t = self.compute_qkv(queries, keys, values, rel_pos,
                                            rel_task)
         q_w, q_r, q_t = list(
             map(lambda x: q + x.unsqueeze([0, 1]),
