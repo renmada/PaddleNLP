@@ -135,7 +135,7 @@ class MultiHeadAttention(nn.Layer):
         score_r = self.__rel_shift(score_r, k.shape[2])
         score_t = paddle.matmul(q_t, t, transpose_y=True)
         score = score_w + score_r + score_t
-        score = score * (self.d_key**-0.5)
+        score = score * (self.d_key ** -0.5)
         if attn_mask is not None:
             score += attn_mask
         weights = F.softmax(score)
@@ -162,7 +162,7 @@ class MultiHeadAttention(nn.Layer):
         keys, values = cat, cat
 
         if not (len(queries.shape) == len(keys.shape) == len(values.shape) \
-            == len(rel_pos.shape) == len(rel_task.shape)== 3):
+                == len(rel_pos.shape) == len(rel_task.shape) == 3):
             raise ValueError(
                 "Inputs: quries, keys, values, rel_pos and rel_task should all be 3-D tensors."
             )
@@ -180,7 +180,7 @@ class MultiHeadAttention(nn.Layer):
                 [k, v, r, t]))
 
         ctx_multiheads = self.__scaled_dot_product_attention([q_w, q_r, q_t], \
-                                    k, v, r, t, attn_mask)
+                                                             k, v, r, t, attn_mask)
 
         out = self.__combine_heads(ctx_multiheads)
         out = self.out_proj(out)
@@ -214,7 +214,7 @@ class ErnieDocEncoderLayer(nn.Layer):
             r_w_bias, r_r_bias, r_t_bias = \
                 list(map(lambda x: self.create_parameter(
                     shape=[n_head * d_key], dtype="float32"),
-                    ["r_w_bias", "r_r_bias", "r_t_bias"]))
+                         ["r_w_bias", "r_r_bias", "r_t_bias"]))
 
         weight_attrs = _convert_param_attr_to_list(weight_attr, 2)
         bias_attrs = _convert_param_attr_to_list(bias_attr, 2)
@@ -271,7 +271,7 @@ class ErnieDocEncoder(nn.Layer):
         self.layers = nn.LayerList([(
             encoder_layer
             if i == 0 else type(encoder_layer)(**encoder_layer._config))
-                                    for i in range(num_layers)])
+            for i in range(num_layers)])
         self.num_layers = num_layers
         self.normalize_before = self.layers[0].normalize_before
         self.mem_len = mem_len
@@ -346,9 +346,9 @@ class ErnieDocPretrainedModel(PretrainedModel):
     pretrained_resource_files_map = {
         "model_state": {
             "ernie-doc-base-en":
-            "https://bj.bcebos.com/paddlenlp/models/transformers/ernie-doc-base-en/ernie-doc-base-en.pdparams",
+                "https://bj.bcebos.com/paddlenlp/models/transformers/ernie-doc-base-en/ernie-doc-base-en.pdparams",
             "ernie-doc-base-zh":
-            "https://bj.bcebos.com/paddlenlp/models/transformers/ernie-doc-base-zh/ernie-doc-base-zh.pdparams",
+                "https://bj.bcebos.com/paddlenlp/models/transformers/ernie-doc-base-zh/ernie-doc-base-zh.pdparams",
         }
     }
     base_model_prefix = "ernie_doc"
@@ -514,7 +514,7 @@ class ErnieDocModel(ErnieDocPretrainedModel):
             r_w_bias, r_r_bias, r_t_bias = \
                 list(map(lambda x: self.create_parameter(
                     shape=[num_attention_heads * d_key], dtype="float32"),
-                    ["r_w_bias", "r_r_bias", "r_t_bias"]))
+                         ["r_w_bias", "r_r_bias", "r_t_bias"]))
         d_key = hidden_size // num_attention_heads
         d_value = hidden_size // num_attention_heads
         d_inner_hid = hidden_size * 4
@@ -545,13 +545,13 @@ class ErnieDocModel(ErnieDocPretrainedModel):
             max_position_embeddings, task_type_vocab_size, pad_token_id)
         self.pooler = ErnieDocPooler(hidden_size, cls_token_idx)
 
-    def _create_n_head_attn_mask(self, attn_mask, batch_size):
+    def _create_n_head_attn_mask(self, attn_mask, memory_i):
         # attn_mask shape: [B, T, 1]
         # concat an data_mask, shape: [B, M + T, 1]
         data_mask = paddle.concat(
             [
-                paddle.ones(
-                    shape=[batch_size, self.memory_len, 1],
+                paddle.ones_like(
+                    memory_i,
                     dtype=attn_mask.dtype), attn_mask
             ],
             axis=1)
@@ -662,7 +662,7 @@ class ErnieDocModel(ErnieDocPretrainedModel):
         batch_size = input_embeddings.shape[0]
         # [B, N, T, M + T]
         n_head_self_attn_mask = self._create_n_head_attn_mask(attn_mask,
-                                                              batch_size)
+                                                              memories[0])
         # memories contains n_layer memory whose shape is [B, M, H]
         encoder_output, new_mem = self.encoder(
             enc_input=input_embeddings,
