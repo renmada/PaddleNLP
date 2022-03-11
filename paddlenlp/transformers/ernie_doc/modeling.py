@@ -165,11 +165,12 @@ class MultiHeadAttention(nn.Layer):
         print(queries.shape, keys.shape, values.shape, rel_pos.shape, rel_task.shape)
 
         print(len(queries.shape), len(keys.shape),len(values.shape),len(rel_pos.shape),len(rel_task.shape))
-        if not (len(queries.shape) == len(keys.shape) == len(values.shape) \
-                == len(rel_pos.shape) == len(rel_task.shape) == 3):
-            raise ValueError(
-                "Inputs: quries, keys, values, rel_pos and rel_task should all be 3-D tensors."
-            )
+        print(len(queries.shape)==len(keys.shape)==len(values.shape)==len(rel_pos.shape)== len(rel_task.shape)==3)
+        # if not (len(queries.shape) == len(keys.shape) == len(values.shape) \
+        #         == len(rel_pos.shape) == len(rel_task.shape) == 3):
+        #     raise ValueError(
+        #         "Inputs: quries, keys, values, rel_pos and rel_task should all be 3-D tensors."
+        #     )
 
         q, k, v, r, t = self.__compute_qkv(queries, keys, values, rel_pos,
                                            rel_task)
