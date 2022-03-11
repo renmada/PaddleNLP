@@ -93,7 +93,6 @@ python -m paddle.distributed.launch --gpus "0,1" --log_dir imdb run_classifier.p
 | HYP       | ernie-doc-base-en |      0.7412      |
 | IFLYTEK   | ernie-doc-base-zh |      0.6179      |
 
-
 ### 阅读理解任务
 
 阅读理解任务支持抽取式阅读理解与单项选择题任务。
@@ -205,6 +204,17 @@ python -m paddle.distributed.launch --gpus "0,1" --log_dir msra_ner run_sequence
 | Dataset        | Model             |   Precision/Recall/F1   |
 |:--------------:|:-----------------:|:-----------------------:|
 | MSRA-NER       | ernie-doc-base-zh |  0.9288/0.9139/0.9213   |
+
+## Hackathon77任务：基于ERNIE_DOC完成长文本分类任务
+### 模型在IFK上ACC=62.4
+参考原论文的设置，使用以下参数训练可以在dev上达到acc为
+```shell
+python run_classifier.py --batch_size 16 --model_name_or_path ernie-doc-base-zh \
+--learning_rate 1.5e-4 --epochs 5 --max_seq_length 512 --layerwise_decay 0.8 \
+--dataset iflytek --save_steps 100 --logging_steps 50 --seed 4
+```
+训练日志
+### 动转静
 
 
 ## 致谢
